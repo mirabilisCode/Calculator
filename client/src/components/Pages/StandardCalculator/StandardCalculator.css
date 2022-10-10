@@ -6,15 +6,40 @@
   justify-content: center;
 }
 
+.calculator-grid > button {
+  cursor: pointer;
+  font-size: 2rem;
+  border: 1px solid white;
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+.calculator-grid > button:is(:hover, :focus) {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
 .span-two {
   grid-column: span 2;
 }
 
 .calculation-output {
-  background: black;
+  background: rgba(0, 0, 0, 0.5);
   grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 0.75rem;
+  word-wrap: break-word;
+  word-break: break-all;
 }
 
-.calculator-grid button {
-  background-color: blue;
+.calculation-output .previous-operand {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 1.5rem;
+}
+
+.calculation-output .current-operand {
+  color: white;
+  font-size: 2.5rem;
 }
