@@ -11,18 +11,24 @@ const ACTIONS = {
   EVALUATE: "evaluate",
 } as StandardCalculatorActions;
 
+const INTEGER_FORMATTER = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 0,
+});
+
 const StandardCalculator = () => {
   const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(reducer, {} as StandardCalculatorReduceState);
   return (
     <div className="calculator-grid">
       <div className="calculation-output">
         <div className="previous-operand">
-          {previousOperand} {operation}
+          {formatOperand(previousOperand)} {operation}
         </div>
-        <div className="current-operand">{currentOperand}</div>
+        <div className="current-operand">{formatOperand(currentOperand)}</div>
       </div>
-      <button className="span-two">AC</button>
-      <button>DEL</button>
+      <button className="span-two" onClick={() => dispatch({ type: ACTIONS.CLEAR })}>
+        AC
+      </button>
+      <button onClick={() => dispatch({ type: ACTIONS.DELETE_DIGIT })}>DEL</button>
       <OperationButton operation="/" dispatch={dispatch} />
       <DigitButton digit="1" dispatch={dispatch} />
       <DigitButton digit="2" dispatch={dispatch} />
@@ -38,40 +44,50 @@ const StandardCalculator = () => {
       <OperationButton operation="-" dispatch={dispatch} />
       <DigitButton digit="." dispatch={dispatch} />
       <DigitButton digit="0" dispatch={dispatch} />
-      <button className="span-two">=</button>
+      <button className="span-two" onClick={() => dispatch({ type: ACTIONS.EVALUATE })}>
+        =
+      </button>
     </div>
   );
 };
 
 function reducer(state: StandardCalculatorReduceState, action: CustomReducerAction) {
-  switch (action.type) {
+  document?.activeElement instanceof HTMLElement && document.activeElement.blur();
+  switch (action?.type) {
     case ACTIONS.ADD_DIGIT:
-      if (action.payload.digit === "0" && state.currentOperand === "0") {
-        return { ...state } as StandardCalculatorReduceState;
+      if (state.overwrite) {
+        return {
+          ...state,
+          currentOperand: action?.payload?.digit,
+          overwrite: false,
+        } as StandardCalculatorReduceState;
       }
-      if (action.payload.digit === "." && state?.currentOperand?.includes(".")) {
-        return { ...state } as StandardCalculatorReduceState;
+      if (action?.payload?.digit === "0" && state?.currentOperand === "0") {
+        return state;
+      }
+      if (action?.payload?.digit === "." && state?.currentOperand?.includes(".")) {
+        return state;
       }
       return {
         ...state,
-        currentOperand: `${state.currentOperand || ""}${action.payload.digit}`,
+        currentOperand: `${state.currentOperand || ""}${action?.payload?.digit}`,
       } as StandardCalculatorReduceState;
     case ACTIONS.CHOOSE_OPERATION:
       if (state.currentOperand == null && state.previousOperand == null) {
-        return { ...state } as StandardCalculatorReduceState;
+        return state;
       }
 
       if (state.currentOperand == null) {
         return {
           ...state,
-          operation: action.payload.operation,
+          operation: action?.payload?.operation,
         } as StandardCalculatorReduceState;
       }
 
       if (state.previousOperand == null) {
         return {
           ...state,
-          operation: action.payload.operation,
+          operation: action?.payload?.operation,
           previousOperand: state.currentOperand,
           currentOperand: null,
         } as StandardCalculatorReduceState;
@@ -79,25 +95,42 @@ function reducer(state: StandardCalculatorReduceState, action: CustomReducerActi
       return {
         ...state,
         previousOperand: evaluate(state),
-        operation: action.payload.operation,
+        operation: action?.payload?.operation,
         currentOperand: null,
       } as StandardCalculatorReduceState;
     case ACTIONS.CLEAR:
       return {} as StandardCalculatorReduceState;
     case ACTIONS.DELETE_DIGIT:
+      if (state.overwrite) {
+        return {
+          ...state,
+          overwrite: false,
+          currentOperand: null,
+        } as StandardCalculatorReduceState;
+      }
+      if (state.currentOperand == null) return state;
+      if (state.currentOperand.length === 1) {
+        return {
+          ...state,
+          currentOperand: null,
+        };
+      }
+
       return {
         ...state,
-        currentOperand: `${state.currentOperand}${action.payload.digit}`,
+        currentOperand: state.currentOperand.slice(0, -1),
       } as StandardCalculatorReduceState;
     case ACTIONS.EVALUATE:
+      if (state.operation == null || state.currentOperand == null || state.previousOperand == null) return state;
       return {
         ...state,
         currentOperand: evaluate(state),
+        overwrite: true,
         previousOperand: null,
         operation: null,
       } as StandardCalculatorReduceState;
     default:
-      return { ...state } as StandardCalculatorReduceState;
+      return state;
   }
 }
 
@@ -123,9 +156,16 @@ function evaluate(props: StandardCalculatorReduceState): string {
   return computation.toString();
 }
 
+function formatOperand(operand: string | null) {
+  if (!operand) return;
+  const [integer, decimal] = operand.split(".");
+  if (!decimal) return INTEGER_FORMATTER.format(parseFloat(integer));
+  return `${INTEGER_FORMATTER.format(parseFloat(integer))}.${decimal}`;
+}
+
 interface CustomReducerAction {
   type: string;
-  payload: {
+  payload?: {
     digit?: string;
     operation?: string;
   };
@@ -135,6 +175,7 @@ interface StandardCalculatorReduceState {
   currentOperand: string | null;
   previousOperand: string | null;
   operation: string | null;
+  overwrite: boolean;
 }
 
 interface StandardCalculatorActions {
