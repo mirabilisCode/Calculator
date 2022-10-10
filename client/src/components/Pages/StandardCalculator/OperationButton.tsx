@@ -1,5 +1,5 @@
 ﻿import React from "react";
-import { ACTIONS, CustomReducerAction } from "./StandardCalculator";
+import { ACTIONS, StandardCalculatorDispatch } from "./StandardCalculator";
 
 const OperationButton: React.FC<OperationButtonProps> = ({ dispatch, operation }, ...props) => {
   return (
@@ -10,7 +10,7 @@ const OperationButton: React.FC<OperationButtonProps> = ({ dispatch, operation }
 };
 
 interface OperationButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  dispatch: (props: CustomReducerAction) => void;
+  dispatch: (props: StandardCalculatorDispatch) => void;
   operation: string;
 }
 

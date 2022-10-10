@@ -51,7 +51,7 @@ const StandardCalculator = () => {
   );
 };
 
-function reducer(state: StandardCalculatorReduceState, action: CustomReducerAction) {
+function reducer(state: StandardCalculatorReduceState, action: StandardCalculatorDispatch) {
   document?.activeElement instanceof HTMLElement && document.activeElement.blur();
   switch (action?.type) {
     case ACTIONS.ADD_DIGIT:
@@ -163,7 +163,7 @@ function formatOperand(operand: string | null) {
   return `${INTEGER_FORMATTER.format(parseFloat(integer))}.${decimal}`;
 }
 
-interface CustomReducerAction {
+interface StandardCalculatorDispatch {
   type: string;
   payload?: {
     digit?: string;
@@ -188,4 +188,4 @@ interface StandardCalculatorActions {
 
 export default StandardCalculator;
 export { ACTIONS };
-export type { CustomReducerAction };
+export type { StandardCalculatorDispatch };

@@ -1,5 +1,5 @@
 ﻿import React from "react";
-import { ACTIONS, CustomReducerAction } from "./StandardCalculator";
+import { ACTIONS, StandardCalculatorDispatch } from "./StandardCalculator";
 
 const DigitButton: React.FC<DigitButtonProps> = ({ dispatch, digit }, ...props) => {
   return (
@@ -10,7 +10,7 @@ const DigitButton: React.FC<DigitButtonProps> = ({ dispatch, digit }, ...props) 
 };
 
 interface DigitButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  dispatch: (props: CustomReducerAction) => void;
+  dispatch: (props: StandardCalculatorDispatch) => void;
   digit: string;
 }
 
